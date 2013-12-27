@@ -1,0 +1,83 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jaxrs="http://cxf.apache.org/jaxrs" xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/context
+          http://www.springframework.org/schema/context/spring-context-3.0.xsd
+          http://www.springframework.org/schema/data/mongo
+          http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd
+          http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+          http://www.springframework.org/schema/aop
+          http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+          http://cxf.apache.org/jaxrs
+          http://cxf.apache.org/schemas/jaxrs.xsd">
+
+	<import resource="classpath:META-INF/cxf/cxf.xml" />
+
+	<context:spring-configured />
+
+	<aop:config proxy-target-class="true" />
+
+	<aop:aspectj-autoproxy />
+
+	<context:property-placeholder
+		file-encoding="UTF-8"
+		location="classpath:log4j.properties, classpath:datasource.properties" />
+
+	<context:component-scan base-package="jp.projects.miya.mongo_rest"
+		annotation-config="true" />
+
+	<mongo:mongo host="${server.host}" port="${server.port}" />
+
+	<mongo:db-factory dbname="${server.name}" />
+
+	<mongo:mapping-converter id="converter"
+		db-factory-ref="mongoDbFactory" />
+
+	<bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+		<constructor-arg name="mongoDbFactory" ref="mongoDbFactory" />
+	</bean>
+
+	<bean id="gfsTemplate" class="org.springframework.data.mongodb.gridfs.GridFsTemplate">
+		<constructor-arg ref="mongoDbFactory" />
+		<constructor-arg ref="converter" />
+	</bean>
+
+	<jaxrs:server id="userService" address="/user">
+		<jaxrs:serviceBeans>
+			<bean class="jp.projects.miya.mongo_rest.service.UserService" />
+		</jaxrs:serviceBeans>
+		<jaxrs:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+		</jaxrs:providers>
+	</jaxrs:server>
+
+	<jaxrs:server id="echoService" address="/echo">
+		<jaxrs:serviceBeans>
+			<bean class="jp.projects.miya.mongo_rest.service.EchoService" />
+		</jaxrs:serviceBeans>
+		<jaxrs:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+		</jaxrs:providers>
+	</jaxrs:server>
+
+	<jaxrs:server id="imageService" address="/image">
+		<jaxrs:serviceBeans>
+			<bean class="jp.projects.miya.mongo_rest.service.ImageService" />
+		</jaxrs:serviceBeans>
+		<jaxrs:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+		</jaxrs:providers>
+	</jaxrs:server>
+
+	<jaxrs:server id="mapredService" address="/image">
+		<jaxrs:serviceBeans>
+			<bean class="jp.projects.miya.mongo_rest.service.MapReduceService" />
+		</jaxrs:serviceBeans>
+		<jaxrs:providers>
+			<bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+		</jaxrs:providers>
+	</jaxrs:server>
+
+</beans>
